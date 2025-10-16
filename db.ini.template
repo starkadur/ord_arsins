@@ -1,0 +1,9 @@
+; db.ini - database configuration
+; Replace placeholder values with real credentials before use
+
+[postgres]
+host = x
+port = 5432
+database = ord_arsins
+user = x
+password = x
