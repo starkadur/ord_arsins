@@ -9,13 +9,32 @@ from lxml.etree import Element as ET
 import psycopg2
 import psycopg2.extras
 import re
+import configparser
+
 
 def insert(queries):
     
-    conn = psycopg2.connect(host = 'localhost', database='ord_arsins', user='starkadur', password='1plus1er1')
+    config = configparser.ConfigParser()
+    config_path = os.path.join(os.path.dirname(__file__), 'db.ini')
+    if not os.path.exists(config_path):
+        raise FileNotFoundError(f"Database config file not found: {config_path}")
+    config.read(config_path)
+
+    if 'postgres' not in config:
+        raise KeyError("Missing 'postgres' section in DB config")
+
+    cfg = config['postgres']
+    host = cfg.get('host', 'localhost')
+    database = cfg.get('database')
+    user = cfg.get('user')
+    password = cfg.get('password')
+
+    if not all([database, user, password]):
+        raise ValueError("Database, user and password must be set in the 'postgres' section of the DB config")
+    conn = psycopg2.connect(host = host, database=database, user=user, password=password)
     dbString = "insert into ord_arsins_lemmur (lemma, fjoldi, midill, artal) VALUES(%s, %s, %s, %s)"
     cur = conn.cursor()
-
+ 
     for q in queries:
         cur.execute(dbString, q)
 
